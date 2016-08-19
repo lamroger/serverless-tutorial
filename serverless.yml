@@ -33,6 +33,10 @@ provider:
 functions:
   hello:
     handler: handler.hello
+    events:
+      - http:
+          path: greet
+          method: get
 
 #   you can add any of the following events
 #   events:
