@@ -11,3 +11,17 @@ functions:
       - http:
           path: greet
           method: get
+  getVehicle:
+    handler: handler.getVehicle
+    events:
+    - http:
+        path: vehicles/{vehicleID}
+        method: get
+  getSecurityDoors:
+    handler: handler.getSecurityDoors
+    events:
+    - http:
+        path: vehicles/{vehicleID}/doors
+        method: get  
+
+
