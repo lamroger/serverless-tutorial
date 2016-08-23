@@ -81,8 +81,14 @@ function mapGmSecurityDoors(item) {
       'locked': door.locked.value === 'True'
     });
   }
-  
+
   return doors;
+}
+
+function mapGmFuel(item) {
+  return {
+    "percent": item.data.tankLevel.value
+  };
 }
 
 // Creating endpoint handlers
@@ -112,5 +118,19 @@ module.exports.getSecurityDoors = function(event, context, cb) {
     console.log(event.path.vehicleID);
     console.log("mapGmSecurityDoors", JSON.stringify(data));
     cb(null, mapGmSecurityDoors(data));
+  });
+}
+
+module.exports.getFuel = function(event, context, cb) {
+  console.log("Request received:\n", JSON.stringify(event));
+  console.log("Context received:\n", JSON.stringify(context));
+
+  performRequest('/getEnergyService', 'POST', {
+    'id': event.path.vehicleID,
+    'responseType': "JSON"
+  }, function(data) {
+    console.log(event.path.vehicleID);
+    console.log("getFuel", JSON.stringify(data));
+    cb(null, mapGmFuel(data));
   });
 }

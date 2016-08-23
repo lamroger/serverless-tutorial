@@ -16,6 +16,12 @@ functions:
     events:
     - http:
         path: vehicles/{vehicleID}/doors
+        method: get
+  getFuel:
+    handler: handler.getFuel
+    events:
+    - http:
+        path: vehicles/{vehicleID}/fuel
         method: get  
 
 
