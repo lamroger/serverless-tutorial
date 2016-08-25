@@ -22,6 +22,18 @@ functions:
     events:
     - http:
         path: vehicles/{vehicleID}/fuel
-        method: get  
+        method: get
+  getBattery:
+    handler: handler.getBattery
+    events:
+    - http:
+        path: vehicles/{vehicleID}/battery
+        method: get
+  # postEngine:
+  #   handler: handler.postEngine
+  #   events:
+  #   - http:
+  #       path: vehicles/{vehicleID}/engine
+  #       method: post
 
 

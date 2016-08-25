@@ -91,6 +91,12 @@ function mapGmFuel(item) {
   };
 }
 
+function mapGmBattery(item) {
+  return {
+    "percent": item.data.batteryLevel.value
+  };
+}
+
 // Creating endpoint handlers
 
 module.exports.getVehicle = function(event, context, cb) {
@@ -134,3 +140,32 @@ module.exports.getFuel = function(event, context, cb) {
     cb(null, mapGmFuel(data));
   });
 }
+
+module.exports.getBattery = function(event, context, cb) {
+  console.log("Request received:\n", JSON.stringify(event));
+  console.log("Context received:\n", JSON.stringify(context));
+
+  performRequest('/getEnergyService', 'POST', {
+    'id': event.path.vehicleID,
+    'responseType': "JSON"
+  }, function(data) {
+    console.log(event.path.vehicleID);
+    console.log("getBattery", JSON.stringify(data));
+    cb(null, mapGmBattery(data));
+  });
+}
+
+// module.exports.postEngine = function(event, context, cb) {
+//   console.log("Request received:\n", JSON.stringify(event));
+//   console.log("Context received:\n", JSON.stringify(context));
+
+//   performRequest('/actionEngineService', 'POST', {
+//     'id': event.path.vehicleID,
+//     'command': event.
+//     'responseType': "JSON"
+//   }, function(data) {
+//     console.log(event.path.vehicleID);
+//     console.log("getBattery", JSON.stringify(data));
+//     cb(null, mapGmBattery(data));
+//   });
+// }
