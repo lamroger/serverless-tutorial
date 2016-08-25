@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
-var https = require('https');
-var querystring = require('querystring');
+var https = require("https");
+var querystring = require("querystring");
 
 // GM API
-var host = 'gmapi.azurewebsites.net';
+var host = "gmapi.azurewebsites.net";
 
 // Helper Functions
 
@@ -13,13 +13,13 @@ function performRequest(endpoint, method, data, success) {
   var dataString = JSON.stringify(data);
   var headers = {};
   
-  if (method == 'GET') {
-    endpoint += '?' + querystring.stringify(data);
+  if (method == "GET") {
+    endpoint += "?" + querystring.stringify(data);
   }
   else {
     headers = {
-      'Content-Type': 'application/json',
-      'Content-Length': dataString.length
+      "Content-Type": "application/json",
+      "Content-Length": dataString.length
     };
   }
   var options = {
@@ -30,15 +30,15 @@ function performRequest(endpoint, method, data, success) {
   };
 
   var req = https.request(options, function(res) {
-    res.setEncoding('utf-8');
+    res.setEncoding("utf-8");
 
-    var responseString = '';
+    var responseString = "";
 
-    res.on('data', function(data) {
+    res.on("data", function(data) {
       responseString += data;
     });
 
-    res.on('end', function() {
+    res.on("end", function() {
       console.log(responseString);
       var responseObject = JSON.parse(responseString);
       success(responseObject);
@@ -53,9 +53,9 @@ function performRequest(endpoint, method, data, success) {
 
 function mapGmVehicle(item) {
   var doorCount; 
-  if (item.data.fourDoorSedan.value === 'True') {
+  if (item.data.fourDoorSedan.value === "True") {
     doorCount = 4;
-  } else if (item.data.twoDoorCoupe.value === 'True') {
+  } else if (item.data.twoDoorCoupe.value === "True") {
     doorCount = 2;
   } else {
     doorCount = 0;
@@ -77,8 +77,8 @@ function mapGmSecurityDoors(item) {
   for (var i = 0; i < doorArrayLength; i++) {
     var door = doorArray[i];
     doors.push({ 
-      'location': door.location.value,
-      'locked': door.locked.value === 'True'
+      "location": door.location.value,
+      "locked": door.locked.value === "True"
     });
   }
 
@@ -97,15 +97,28 @@ function mapGmBattery(item) {
   };
 }
 
+function mapGmEngine(item) {
+  var status;
+  if (item.actionResult.status === "EXECUTED") {
+    status = "success";
+  } else if (item.actionResult.status === "FAILED") {
+    status = "error";
+  }
+
+  return {
+    "status": status
+  };
+}
+
 // Creating endpoint handlers
 
 module.exports.getVehicle = function(event, context, cb) {
   console.log("Request received:\n", JSON.stringify(event));
   console.log("Context received:\n", JSON.stringify(context));
 
-  performRequest('/getVehicleInfoService', 'POST', {
-    'id': event.path.vehicleID,
-    'responseType': "JSON"
+  performRequest("/getVehicleInfoService", "POST", {
+    "id": event.path.vehicleID,
+    "responseType": "JSON"
   }, function(data) {
     console.log(event.path.vehicleID);
     console.log("getVehicle", JSON.stringify(data));
@@ -117,9 +130,9 @@ module.exports.getSecurityDoors = function(event, context, cb) {
   console.log("Request received:\n", JSON.stringify(event));
   console.log("Context received:\n", JSON.stringify(context));
 
-  performRequest('/getSecurityStatusService', 'POST', {
-    'id': event.path.vehicleID,
-    'responseType': "JSON"
+  performRequest("/getSecurityStatusService", "POST", {
+    "id": event.path.vehicleID,
+    "responseType": "JSON"
   }, function(data) {
     console.log(event.path.vehicleID);
     console.log("mapGmSecurityDoors", JSON.stringify(data));
@@ -131,9 +144,9 @@ module.exports.getFuel = function(event, context, cb) {
   console.log("Request received:\n", JSON.stringify(event));
   console.log("Context received:\n", JSON.stringify(context));
 
-  performRequest('/getEnergyService', 'POST', {
-    'id': event.path.vehicleID,
-    'responseType': "JSON"
+  performRequest("/getEnergyService", "POST", {
+    "id": event.path.vehicleID,
+    "responseType": "JSON"
   }, function(data) {
     console.log(event.path.vehicleID);
     console.log("getFuel", JSON.stringify(data));
@@ -145,9 +158,9 @@ module.exports.getBattery = function(event, context, cb) {
   console.log("Request received:\n", JSON.stringify(event));
   console.log("Context received:\n", JSON.stringify(context));
 
-  performRequest('/getEnergyService', 'POST', {
-    'id': event.path.vehicleID,
-    'responseType': "JSON"
+  performRequest("/getEnergyService", "POST", {
+    "id": event.path.vehicleID,
+    "responseType": "JSON"
   }, function(data) {
     console.log(event.path.vehicleID);
     console.log("getBattery", JSON.stringify(data));
@@ -155,17 +168,24 @@ module.exports.getBattery = function(event, context, cb) {
   });
 }
 
-// module.exports.postEngine = function(event, context, cb) {
-//   console.log("Request received:\n", JSON.stringify(event));
-//   console.log("Context received:\n", JSON.stringify(context));
+module.exports.postEngine = function(event, context, cb) {
+  console.log("Request received:\n", JSON.stringify(event));
+  console.log("Context received:\n", JSON.stringify(context));
 
-//   performRequest('/actionEngineService', 'POST', {
-//     'id': event.path.vehicleID,
-//     'command': event.
-//     'responseType': "JSON"
-//   }, function(data) {
-//     console.log(event.path.vehicleID);
-//     console.log("getBattery", JSON.stringify(data));
-//     cb(null, mapGmBattery(data));
-//   });
-// }
+  var command;
+  if (event.body.action === "START") {
+    command = "START_VEHICLE";
+  } else if (event.body.action === "STOP") {
+    command = "STOP_VEHICLE";
+  }
+
+  performRequest("/actionEngineService", "POST", {
+    "id": event.path.vehicleID,
+    "command": command,
+    "responseType": "JSON"
+  }, function(data) {
+    console.log(event.path.vehicleID);
+    console.log("postEngine", JSON.stringify(data));
+    cb(null, mapGmEngine(data));
+  });
+}

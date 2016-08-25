@@ -29,11 +29,11 @@ functions:
     - http:
         path: vehicles/{vehicleID}/battery
         method: get
-  # postEngine:
-  #   handler: handler.postEngine
-  #   events:
-  #   - http:
-  #       path: vehicles/{vehicleID}/engine
-  #       method: post
+  postEngine:
+    handler: handler.postEngine
+    events:
+    - http:
+        path: vehicles/{vehicleID}/engine
+        method: post
 
 
